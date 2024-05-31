@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMaterialLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AR1PlayerController::AR1PlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -47,18 +48,27 @@ void AR1PlayerController::Input_Move(const FInputActionValue& InputValue)
 
 	if (MovementVector.X != 0)
 	{
-		FVector Direction = FVector::ForwardVector * MovementVector.X;
+		//FVector Direction = FVector::ForwardVector * MovementVector.X;
 		// Direction print out the value of the direction
 		//GEngine->AddOnScreenDebugMessage(0, 3.0f, FColor::Cyan, FString::Printf(TEXT("X Direction: %s"), *Direction.ToString()));
-		GetPawn()->AddActorWorldOffset(Direction * 50.f);
+		//GetPawn()->AddActorWorldOffset(Direction * 50.f);
+
+		// Player Controller 의 회전값을 기준으로 동작하게 만듬
+		FRotator Rotator = GetControlRotation();
+		FVector Direction = UKismetMathLibrary::GetForwardVector(FRotator(0, Rotator.Yaw, 0));
+		GetPawn()->AddMovementInput(Direction, MovementVector.X);
 	}
 
 	if (MovementVector.Y != 0)
 	{
-		FVector Direction = FVector::RightVector * MovementVector.Y;
+		//FVector Direction = FVector::RightVector * MovementVector.Y;
 		// Direction print out the value of the direction
 		//GEngine->AddOnScreenDebugMessage(0 , 3.0f , FColor::Cyan , FString::Printf(TEXT("Y Direction: %s") , *Direction.ToString()));
-		GetPawn()->AddActorWorldOffset(Direction * 50.f);
+		//GetPawn()->AddActorWorldOffset(Direction * 50.f);
+
+		FRotator Rotator = GetControlRotation();
+		FVector Direction = UKismetMathLibrary::GetRightVector(FRotator(0, Rotator.Yaw, 0));
+		GetPawn()->AddMovementInput(Direction, MovementVector.Y);
 	}
 }
 
