@@ -29,15 +29,15 @@ private:
 	void Input_Turn(const FInputActionValue& InputValue);
 
 protected:
-	UPROPERTY(EditAnywhere, Category=Input)
-	TObjectPtr<class UInputMappingContext> InputMappingContext;
-
-	UPROPERTY(EditAnywhere , Category = Input)
-	TObjectPtr<class UInputAction> TestAction;
-
-	UPROPERTY(EditAnywhere , Category = Input)
-	TObjectPtr<class UInputAction> MoveAction;
-
-	UPROPERTY(EditAnywhere , Category = Input)
-	TObjectPtr<class UInputAction> TurnAction;
+	// UPROPERTY(EditAnywhere, Category=Input)
+	// TObjectPtr<class UInputMappingContext> InputMappingContext;
+	//
+	// UPROPERTY(EditAnywhere , Category = Input)
+	// TObjectPtr<class UInputAction> TestAction;
+	//
+	// UPROPERTY(EditAnywhere , Category = Input)
+	// TObjectPtr<class UInputAction> MoveAction;
+	//
+	// UPROPERTY(EditAnywhere , Category = Input)
+	// TObjectPtr<class UInputAction> TurnAction;
 };

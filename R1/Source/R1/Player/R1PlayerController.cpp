@@ -6,6 +6,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "System/R1AssetManager.h"
+#include "Data/R1InputData.h"
+#include "R1GameplayTags.h"
 
 AR1PlayerController::AR1PlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -16,10 +19,17 @@ void AR1PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
-	{
-		Subsystem->AddMappingContext(InputMappingContext , 0);
+	// if (auto* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	// {
+	// 	Subsystem->AddMappingContext(InputMappingContext , 0);
+	// }
 
+	if (const UR1InputData* InputData = UR1AssetManager::GetAssetByName<UR1InputData>("InputData"))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(InputData->InputMappingContext, 0);
+		}
 	}
 }
 
@@ -27,12 +37,24 @@ void AR1PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	if (const UR1InputData* InputData = UR1AssetManager::GetAssetByName<UR1InputData>("InputData"))
 	{
-		EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Test);
-		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-		EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
+		UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent);
+
+		auto Action1 = InputData->FindInputActionByTag(R1GameplayTags::Input_Action_Move);
+		EnhancedInputComponent->BindAction(Action1, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+
+		auto Action2 = InputData->FindInputActionByTag(R1GameplayTags::Input_Action_Turn);
+		EnhancedInputComponent->BindAction(Action2, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
 	}
+
+
+	// if (auto* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
+	// {
+	// 	EnhancedInputComponent->BindAction(TestAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Test);
+	// 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+	// 	EnhancedInputComponent->BindAction(TurnAction, ETriggerEvent::Triggered, this, &ThisClass::Input_Turn);
+	// }
 }
 
 void AR1PlayerController::Input_Test(const FInputActionValue& InputValue)
