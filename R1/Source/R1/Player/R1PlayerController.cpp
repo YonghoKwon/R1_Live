@@ -118,4 +118,9 @@ void AR1PlayerController::Input_Jump(const FInputActionValue& InputValue)
 void AR1PlayerController::Input_Attack(const FInputActionValue& InputValue)
 {
 	UE_LOG(LogR1, Log, TEXT("Attack"));
+
+	if (AttackMontage)
+	{
+		Cast<AR1Player>(GetPawn())->PlayAnimMontage(AttackMontage);
+	}
 }
