@@ -39,6 +39,8 @@ void AR1PlayerController::BeginPlay()
 			Subsystem->AddMappingContext(InputData->InputMappingContext, 0);
 		}
 	}
+
+	R1Player = Cast<AR1Player>(GetCharacter());
 }
 
 void AR1PlayerController::SetupInputComponent()
@@ -64,6 +66,13 @@ void AR1PlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	TickCursorTrace();
+
+	if (GetCharacter()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(nullptr) == false)
+	{
+		SetCreatureState(ECreatureState::Moving);
+	}
+
+	ChaseTargetAndAttack();
 }
 
 void AR1PlayerController::TickCursorTrace()
@@ -110,14 +119,71 @@ void AR1PlayerController::TickCursorTrace()
 	HighlightActor = LocalHighlightActor;
 }
 
+void AR1PlayerController::ChaseTargetAndAttack()
+{
+	if (TargetActor == nullptr)
+	{
+		return;
+	}
+
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
+	FVector Direction = TargetActor->GetActorLocation() - R1Player->GetActorLocation();
+	if (Direction.Length() < 250.f)
+	{
+		GEngine->AddOnScreenDebugMessage(0, 5.f, FColor::Cyan, TEXT("Attack!"));
+
+		if (AttackMontage)
+		{
+			if (bMousePressed)
+			{
+				// if (GetCharacter()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(nullptr) == false)
+
+				// R1Payer가 타겟 Actor 를 바라보는 방향을 구한다.
+				FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(R1Player->GetActorLocation(), TargetActor->GetActorLocation());
+				R1Player->SetActorRotation(Rotator);
+
+				GetCharacter()->PlayAnimMontage(AttackMontage);
+				SetCreatureState(ECreatureState::Skill);
+
+				TargetActor = HighlightActor;
+			}
+			else
+			{
+				TargetActor = nullptr;
+			}
+		}
+	}
+	else
+	{
+		FVector WorldDirection = Direction.GetSafeNormal();
+		R1Player->AddMovementInput(WorldDirection, 1.0, false);
+	}
+}
+
 void AR1PlayerController::OnInputStarted()
 {
 	StopMovement();
+	bMousePressed = true;
+	TargetActor = HighlightActor;
 }
 
 // Triggered every frame when the input is held down
 void AR1PlayerController::OnSetDestinationTriggered()
 {
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
+	if (TargetActor)
+	{
+		return;
+	}
+
 	// We flag that the input is being pressed
 	FollowTime += GetWorld()->GetDeltaSeconds();
 
@@ -132,23 +198,50 @@ void AR1PlayerController::OnSetDestinationTriggered()
 	}
 
 	// Move towards mouse pointer or touch
-	APawn* ControlledPawn = GetPawn();
-	if (ControlledPawn != nullptr)
+	if (R1Player)
 	{
-		FVector WorldDirection = (CachedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-		ControlledPawn->AddMovementInput(WorldDirection, 1.0, false);
+		FVector WorldDirection = (CachedDestination - R1Player->GetActorLocation()).GetSafeNormal();
+		R1Player->AddMovementInput(WorldDirection, 1.0, false);
 	}
 }
 
 void AR1PlayerController::OnSetDestinationReleased()
 {
+	bMousePressed = false;
+
+	if (GetCreatureState() == ECreatureState::Skill)
+	{
+		return;
+	}
+
 	// If it was a shor press
 	if (FollowTime <= ShortPressThreshold)
 	{
-		// We move there and spawn some particles
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		if (TargetActor == nullptr)
+		{
+			// We move there and spawn some particles
+			UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, CachedDestination);
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, FXCursor, CachedDestination, FRotator::ZeroRotator, FVector(1.f, 1.f, 1.f), true, true, ENCPoolMethod::None, true);
+		}
 	}
 
 	FollowTime = 0.f;
+}
+
+ECreatureState AR1PlayerController::GetCreatureState()
+{
+	if (R1Player)
+	{
+		return R1Player->CreatureState;
+	}
+
+	return ECreatureState::None;
+}
+
+void AR1PlayerController::SetCreatureState(ECreatureState InState)
+{
+	if (R1Player)
+	{
+		R1Player->CreatureState = InState;
+	}
 }

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "R1Define.h"
 #include "GameFramework/Character.h"
 #include "Interface/R1HighlightInterface.h"
 #include "R1Character.generated.h"
@@ -31,4 +32,8 @@ public:
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool bHighlighted = false;
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	ECreatureState CreatureState = ECreatureState::Moving;
 };
