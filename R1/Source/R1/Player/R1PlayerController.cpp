@@ -59,6 +59,57 @@ void AR1PlayerController::SetupInputComponent()
 	}
 }
 
+void AR1PlayerController::PlayerTick(float DeltaTime)
+{
+	Super::PlayerTick(DeltaTime);
+
+	TickCursorTrace();
+}
+
+void AR1PlayerController::TickCursorTrace()
+{
+	if (bMousePressed)
+	{
+		return;
+	}
+
+	FHitResult OutCursorHit;
+	// 아무것도 커서에 선택이 되지 않았을 때...
+	if (GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, OUT OutCursorHit) == false)
+	{
+		return;
+	}
+
+	AR1Character* LocalHighlightActor = Cast<AR1Character>(OutCursorHit.GetActor());
+	if (LocalHighlightActor == nullptr)
+	{
+		// 있었는데 없어짐.
+		if (HighlightActor)
+		{
+			HighlightActor->Unhighlight();
+		}
+	}
+	else
+	{
+		if (HighlightActor)
+		{
+			if (HighlightActor != LocalHighlightActor)
+			{
+				// 다른 타겟인 경우, 하이라이팅 변경
+				HighlightActor->Unhighlight();
+				LocalHighlightActor->Highlight();
+			}
+		}
+		else
+		{
+			// 원래 없었고 새로운 타겟.
+			LocalHighlightActor->Highlight();
+		}
+	}
+
+	HighlightActor = LocalHighlightActor;
+}
+
 void AR1PlayerController::OnInputStarted()
 {
 	StopMovement();
