@@ -75,6 +75,17 @@ void AR1PlayerController::PlayerTick(float DeltaTime)
 	ChaseTargetAndAttack();
 }
 
+void AR1PlayerController::HandleGameplayEvent(FGameplayTag EventTag)
+{
+	if (EventTag.MatchesTag(R1GameplayTags::Event_Montage_Attack))
+	{
+		if (TargetActor)
+		{
+			TargetActor->OnDamaged(R1Player->FinalDamage, R1Player);
+		}
+	}
+}
+
 void AR1PlayerController::TickCursorTrace()
 {
 	if (bMousePressed)
@@ -141,6 +152,7 @@ void AR1PlayerController::ChaseTargetAndAttack()
 			if (bMousePressed)
 			{
 				// if (GetCharacter()->GetMesh()->GetAnimInstance()->Montage_IsPlaying(nullptr) == false)
+				// TargetActor->OnDamaged(R1Player->FinalDamage , R1Player);
 
 				// R1Payer가 타겟 Actor 를 바라보는 방향을 구한다.
 				FRotator Rotator = UKismetMathLibrary::FindLookAtRotation(R1Player->GetActorLocation(), TargetActor->GetActorLocation());
