@@ -33,13 +33,14 @@ void AR1Character::HandleGameplayEvent(FGameplayTag EventTag)
 void AR1Character::Highlight()
 {
 	bHighlighted = true;
-
+	GetMesh()->SetRenderCustomDepth(true);
+	GetMesh()->SetCustomDepthStencilValue(250);
 }
 
 void AR1Character::Unhighlight()
 {
 	bHighlighted = false;
-
+	GetMesh()->SetRenderCustomDepth(false);
 }
 
 void AR1Character::OnDamaged(int32 Damage, TObjectPtr<AR1Character> Attacker)
