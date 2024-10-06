@@ -25,8 +25,14 @@ public:
 
 protected:
 	virtual void NativeConstruct() override;
-
 	void OnInventoryEntryChanged(const FIntPoint& InItemSlotPos, TObjectPtr<UR1ItemInstance> Item);
+
+	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual void NativeOnDragLeave(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+private:
+	void FinishDrag();
 
 protected:
 	UPROPERTY()
@@ -49,6 +55,7 @@ private:
 	TObjectPtr<UCanvasPanel> CanvasPanel_Entries;
 
 private:
+	FIntPoint PrevDragOverSlotPos = FIntPoint(-1, -1);
 	const int X_COUNT = 10;
 	const int Y_COUNT = 5;
 };

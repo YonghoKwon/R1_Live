@@ -11,6 +11,7 @@ class UR1InventorySlotsWidget;
 class USizeBox;
 class UTextBlock;
 class UImage;
+class UR1ItemDragWidget;
 
 /**
  * 
@@ -34,6 +35,9 @@ protected:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
 	virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 
+	void RefreshWidgetOpacity(bool bClearlyVisible);
+	void RefreshItemCount(int32 NewItemCount);
+
 private:
 	FIntPoint CachedFromSlotPos = FIntPoint::ZeroValue;
 	FVector2D CachedDeltaWidgetPos = FVector2D::ZeroVector;
@@ -46,8 +50,8 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UR1ItemInstance> ItemInstance;
 
-	// UPROPERTY()
-	// TSubclassOf<UR1ItemDragWidget> DragWidgetClass;
+	UPROPERTY()
+	TSubclassOf<UR1ItemDragWidget> DragWidgetClass;
 
 protected:
 	UPROPERTY(meta = (BindWidget))
